@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int      @id @default(autoincrement())
+  oauthId     String   @unique
+  displayName String
+  email       String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+  snippets    Snippet[]
+}
+
+model Snippet {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  code        String
+  language    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id])
+  tags        TagOnSnippet[]
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  snippets  Snippet[]
+}
+
+model Tag {
+  id         Int           @id @default(autoincrement())
+  name       String        @unique
+  snippets   TagOnSnippet[]
+}
+
+model TagOnSnippet {
+  snippetId Int
+  tagId     Int
+  snippet   Snippet @relation(fields: [snippetId], references: [id])
+  tag       Tag     @relation(fields: [tagId], references: [id])
+  @@id([snippetId, tagId])
+}
